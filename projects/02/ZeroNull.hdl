@@ -1,0 +1,15 @@
+CHIP ZeroNull {
+   IN
+     in[16],	// 16-bit input
+     z, 	// zero the input
+     n;		// negate the input
+
+   OUT
+     out[16];
+
+   PARTS:
+     Mux16(a=true, b=false, sel=z, out=shouldz);
+     And16(a=in, b=shouldz, out=a-or-null);
+     Not16(in=a-or-null, out=not-a-or-null);
+     Mux16(a=a-or-null, b=not-a-or-null, sel=n, out=out);
+}
