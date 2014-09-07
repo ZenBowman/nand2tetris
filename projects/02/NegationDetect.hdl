@@ -1,0 +1,15 @@
+CHIP NegationDetect {
+   IN
+     in[16];
+ 
+   OUT
+     z, n;
+
+   PARTS:
+   And(a=in[15], b=true, out=n);
+   
+   Or8Way(in=in[0..7], out=anyones-top);
+   Or8Way(in=in[8..15], out=anyones-bot);
+   Or(a=anyones-top, b=anyones-bot, out=anyones);
+   Not(in=anyones, out=z);
+}

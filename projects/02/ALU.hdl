@@ -45,5 +45,13 @@ CHIP ALU {
         ng; // 1 if (out<0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    ZeroNull(in=x, z=zx, n=nx, out=xout);
+    ZeroNull(in=y, z=zy, n=ny, out=yout);
+    And16(a=xout, b=yout, out=andout);
+    Add16(a=xout, b=yout, out=addout);
+    Mux16(a=andout, b=addout, sel=f, out=original-out);
+    Not16(in=original-out, out=negated-out);
+    Mux16(a=original-out, b=negated-out, sel=no, out=tout);
+    NegationDetect(in=tout, z=zr, n=ng);
+    And16(a=true, b=tout, out=out);
 }
