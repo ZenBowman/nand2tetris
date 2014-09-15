@@ -9,7 +9,7 @@ def main():
             lines.append(line)
     for i in range(16):
         for line in lines:
-            print line.replace("0", str(i))
+            print line.replace("NN", str(i))
 
 if __name__ == "__main__":
     main()
