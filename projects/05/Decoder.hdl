@@ -1,0 +1,22 @@
+CHIP Decoder {
+     IN instruction[16];
+
+     OUT aInstruction,
+     	 aBit,
+	 control[6],
+	 dest[3],
+	 jump[3];
+
+     PARTS:
+     Not(in=instruction[15],  out=aInstruction);
+     And16(a[0..5]=instruction[4..9], a[6..15]=false, 
+     				      b[0]=instruction[15], 
+				      b[1]=instruction[15], 
+				      b[2]=instruction[15], 		      
+				      b[3]=instruction[15], 
+				      b[4]=instruction[15], 
+				      b[5]=instruction[15], 
+				      b[6..15]=false,
+				      out[0..5]=control);
+
+}
