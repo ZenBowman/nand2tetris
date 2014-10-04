@@ -1,5 +1,7 @@
 package org.zenbowman.nand2tetris.assembler.parser
 
+import scala.util.parsing.combinator.RegexParsers
+
 /**
  * AST types that represent instructions in the HACK assembly language
  */
@@ -40,7 +42,37 @@ object AST {
 /**
  * Parser class for the HACK assembler
  */
-object Parser {
+class Parser extends RegexParsers {
 
+  import AST._
 
+  def program: Parser[Program] = {
+    rep(instruction) ^^ { x => Program(x) }
+  }
+
+  def instruction: Parser[Instruction] =
+    ainstruction
+
+  def ainstruction: Parser[AInstruction] = {
+    "@" ~> addr ^^ {
+      x => AInstruction(x)
+    }
+  }
+
+  def addr: Parser[Address] = symadd | litadd
+
+  def symadd: Parser[SymbolicAddress] = {
+    "([a-zA-Z]+)".r ^^ {
+      case x: String =>
+        SymbolicAddress(x)
+    }
+  }
+
+  def litadd: Parser[RealAddress] = {
+    "([0-9]+)".r ^^ {
+      x =>
+        println(x)
+        RealAddress(x.toInt)
+    }
+  }
 }
