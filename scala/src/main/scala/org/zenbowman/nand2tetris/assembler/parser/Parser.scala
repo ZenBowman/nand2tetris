@@ -15,11 +15,11 @@ object AST {
 
   trait Address
 
-  case class RealAddress(address: Int) extends Address
+  case class LiteralAddress(address: Int) extends Address
 
   case class SymbolicAddress(address: String) extends Address
 
-  case class CInstruction(aBit: Boolean, comp: Comp.Comp, dest: Dest.Dest, jump: Jump.Jump)
+  case class CInstruction(comp: Comp.Comp, dest: Dest.Dest, jump: Jump.Jump) extends Instruction
 
   object Comp extends Enumeration {
     type Comp = Value
@@ -29,7 +29,7 @@ object AST {
 
   object Dest extends Enumeration {
     type Dest = Value
-    val Null, M, D, MD, A, AM, AD, AMB = Value
+    val Null, M, D, MD, A, AM, AD, AMD = Value
   }
 
   object Jump extends Enumeration {
@@ -47,32 +47,70 @@ class Parser extends RegexParsers {
   import AST._
 
   def program: Parser[Program] = {
-    rep(instruction) ^^ { x => Program(x) }
+    rep(instruction) ^^ {
+      x => Program(x)
+    }
   }
 
   def instruction: Parser[Instruction] =
-    ainstruction
+    aInstruction | cInstruction
 
-  def ainstruction: Parser[AInstruction] = {
-    "@" ~> addr ^^ {
+  def aInstruction: Parser[AInstruction] = {
+    "@" ~> address ^^ {
       x => AInstruction(x)
     }
   }
 
-  def addr: Parser[Address] = symadd | litadd
+  def address: Parser[Address] = symbolicAddress | literalAddress
 
-  def symadd: Parser[SymbolicAddress] = {
+  def symbolicAddress: Parser[SymbolicAddress] = {
     "([a-zA-Z]+)".r ^^ {
-      case x: String =>
-        SymbolicAddress(x)
+      x => SymbolicAddress(x)
     }
   }
 
-  def litadd: Parser[RealAddress] = {
+  def literalAddress: Parser[LiteralAddress] = {
     "([0-9]+)".r ^^ {
-      x =>
-        println(x)
-        RealAddress(x.toInt)
+      x => LiteralAddress(x.toInt)
     }
+  }
+
+  def cInstruction: Parser[CInstruction] = {
+    opt(dest) ~ comp ~ opt(jump) ^^ {
+      case Some(d) ~ c ~ Some(j) => CInstruction(c, d, j)
+      case Some(d) ~ c ~ None => CInstruction(c, d, Jump.Null)
+    }
+  }
+
+  def dest: Parser[Dest.Dest] = {
+    "([A-Z]+)".r <~ "=" ^^ {
+      case "M" => Dest.M
+      case "D" => Dest.D
+      case "MD" => Dest.MD
+      case "A" => Dest.A
+      case "AM" => Dest.AM
+      case "AD" => Dest.AD
+      case "AMD" => Dest.AMD
+    }
+  }
+
+  def comp: Parser[Comp.Comp] = {
+    import Comp._
+    def c(k: Comp.Comp)(x: String) = k
+
+    "0" ^^ c(Zero) | "1" ^^ c(One) | "-1" ^^ c(MinusOne) | "!D" ^^ c(NotD) |
+      "!A" ^^ c(NotA) | "-D" ^^ c(MinusD) | "-A" ^^ c(MinusA) | "D+1" ^^ c(DPlusOne) | "A+1" ^^ c(APlusOne) |
+      "D-1" ^^ c(DMinusOne) | "A-1" ^^ c(AMinusOne) | "D+A" ^^ c(DPlusA) | "D-A" ^^ c(DMinusA) | "A-D" ^^ c(AMinusD) |
+      "D&A" ^^ c(DAndA) | "D|A" ^^ c(DOrA) | "!M" ^^ c(NotM) | "-M" ^^ c(MinusM) | "M+1" ^^ c(MPlusOne) |
+      "D+M" ^^ c(DPlusM) | "D-M" ^^ c(DMinusM) | "M-D" ^^ c(MMinusD) | "D&M" ^^ c(DAndM) | "D|M" ^^ c(DOrM) |
+      "D" ^^ c(Comp.D) | "A" ^^ c(A) | "M" ^^ c(M)
+  }
+
+  def jump: Parser[Jump.Jump] = {
+    ";" ~> jumpTypes
+  }
+
+  def jumpTypes: Parser[Jump.Jump] = {
+    "JGT" ^^ (_ => Jump.JGT) | "JEQ" ^^ (_ => Jump.JEQ) | "JGE" ^^ (_ => Jump.JGE)
   }
 }
