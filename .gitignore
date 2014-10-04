@@ -3,3 +3,4 @@
 \.#*
 *.out
 tools
+.DS_Store

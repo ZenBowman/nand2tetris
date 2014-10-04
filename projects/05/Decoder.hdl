@@ -3,13 +3,38 @@ CHIP Decoder {
 
      OUT aInstruction,
      	 aBit,
+	 address[15],
 	 control[6],
 	 dest[3],
 	 jump[3];
 
      PARTS:
-     Not(in=instruction[15],  out=aInstruction);
-     And16(a[0..5]=instruction[4..9], a[6..15]=false, 
+     Not(in=instruction[15],  out=aInstruction, out=aInstruct);
+
+     And(a=instruction[15], b=instruction[12], out=aBit);
+
+     And16(a[0..14]=instruction[0..14], a[15]=false,
+					b[0]=aInstruct,
+     					b[1]=aInstruct,
+     					b[2]=aInstruct,
+     					b[3]=aInstruct,
+     					b[4]=aInstruct,
+     					b[5]=aInstruct,
+     					b[6]=aInstruct,
+     					b[7]=aInstruct,
+     					b[8]=aInstruct,
+     					b[9]=aInstruct,
+     					b[10]=aInstruct,
+     					b[11]=aInstruct,
+     					b[12]=aInstruct,
+     					b[13]=aInstruct,
+     					b[14]=aInstruct,
+					b[15]=false,
+					out[0..14]=address);
+
+
+
+     And16(a[0..5]=instruction[6..11], a[6..15]=false, 
      				      b[0]=instruction[15], 
 				      b[1]=instruction[15], 
 				      b[2]=instruction[15], 		      
@@ -19,4 +44,18 @@ CHIP Decoder {
 				      b[6..15]=false,
 				      out[0..5]=control);
 
+     And16(a[0..2]=instruction[3..5], a[3..15]=false,
+     				       b[0]=instruction[15],
+				       b[1]=instruction[15],
+				       b[2]=instruction[15],
+				       b[3..15]=false,
+				       out[0..2]=dest);
+
+     And16(a[0..2]=instruction[0..2], a[3..15]=false,
+     				      b[0]=instruction[15],
+				      b[1]=instruction[15],
+				      b[2]=instruction[15],
+				      b[3..15]=false,
+				      out[0..2]=jump);
+    				       
 }
