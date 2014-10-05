@@ -1,6 +1,6 @@
-package org.zenbowman.nand2tetris.assembler.parser
+package org.zenbowman.nand2tetris.assembler
 
-import scala.util.parsing.combinator.{RegexParsers, Parsers}
+import scala.util.parsing.combinator.RegexParsers
 
 /**
  * AST types that represent instructions in the HACK assembly language
@@ -57,7 +57,7 @@ class Parser extends RegexParsers {
     aInstruction | cInstruction | lInstruction
 
   def lInstruction: Parser[LInstruction] =
-    "([a-zA-Z]+)".r <~ ":" ^^ (x => LInstruction(x))
+    "(" ~> "([a-zA-Z]+)".r <~ ")" ^^ (x => LInstruction(x))
 
   def aInstruction: Parser[AInstruction] = {
     "@" ~> address ^^ {
@@ -83,6 +83,7 @@ class Parser extends RegexParsers {
     opt(dest) ~ comp ~ opt(jump) ^^ {
       case Some(d) ~ c ~ Some(j) => CInstruction(c, d, j)
       case Some(d) ~ c ~ None => CInstruction(c, d, Jump.Null)
+      case None ~ c ~ Some(j) => CInstruction(c, Dest.Null, j)
     }
   }
 

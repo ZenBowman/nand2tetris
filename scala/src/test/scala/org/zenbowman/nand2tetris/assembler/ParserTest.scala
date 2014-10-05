@@ -1,7 +1,7 @@
-package org.zenbowman.nand2tetris.assembler.parser
+package org.zenbowman.nand2tetris.assembler
 
 import junit.framework.{Assert, TestCase}
-import org.zenbowman.nand2tetris.assembler.parser.AST._
+import AST._
 
 class ParserTest extends TestCase {
 
@@ -38,7 +38,7 @@ class ParserTest extends TestCase {
       parser.program,
       """
         |@TEST
-        |FOO:
+        |(FOO)
         |AMD=D|M;JEQ
         |@1234
       """.stripMargin)
