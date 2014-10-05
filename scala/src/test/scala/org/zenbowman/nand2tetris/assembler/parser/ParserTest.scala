@@ -26,6 +26,22 @@ class ParserTest extends TestCase {
 
   def testCInstructionParser() {
     assertParseResult(CInstruction(Comp.Zero, Dest.A, Jump.Null), parser.cInstruction, "A=0")
+    assertParseResult(CInstruction(Comp.DOrM, Dest.AMD, Jump.JEQ), parser.cInstruction, "AMD=D|M;JEQ")
+  }
+
+  def testProgramParser() {
+    assertParseResult(Program(List(
+      AInstruction(SymbolicAddress("TEST")),
+      LInstruction("FOO"),
+      CInstruction(Comp.DOrM, Dest.AMD, Jump.JEQ),
+      AInstruction(LiteralAddress(1234)))),
+      parser.program,
+      """
+        |@TEST
+        |FOO:
+        |AMD=D|M;JEQ
+        |@1234
+      """.stripMargin)
   }
 
   def assertParseResult[T](x: Any, p: parser.Parser[T], s: String) {

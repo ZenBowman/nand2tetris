@@ -1,6 +1,6 @@
 package org.zenbowman.nand2tetris.assembler.parser
 
-import scala.util.parsing.combinator.RegexParsers
+import scala.util.parsing.combinator.{RegexParsers, Parsers}
 
 /**
  * AST types that represent instructions in the HACK assembly language
@@ -37,6 +37,7 @@ object AST {
     val Null, JGT, JEQ, JGE, JLT, JNE, JLE, JMP = Value
   }
 
+  case class LInstruction(label: String) extends Instruction
 }
 
 /**
@@ -53,7 +54,10 @@ class Parser extends RegexParsers {
   }
 
   def instruction: Parser[Instruction] =
-    aInstruction | cInstruction
+    aInstruction | cInstruction | lInstruction
+
+  def lInstruction: Parser[LInstruction] =
+    "([a-zA-Z]+)".r <~ ":" ^^ (x => LInstruction(x))
 
   def aInstruction: Parser[AInstruction] = {
     "@" ~> address ^^ {
@@ -111,6 +115,10 @@ class Parser extends RegexParsers {
   }
 
   def jumpTypes: Parser[Jump.Jump] = {
-    "JGT" ^^ (_ => Jump.JGT) | "JEQ" ^^ (_ => Jump.JEQ) | "JGE" ^^ (_ => Jump.JGE)
+    import Jump._
+    def j(k: Jump)(x: String) = k
+
+    "JGT" ^^ j(JGT) | "JEQ" ^^ j(JEQ) | "JGE" ^^ j(JGE) | "JLT" ^^ j(JLT) | "JNE" ^^ j(JNE) | "JLE" ^^ j(JLE) |
+      "JMP" ^^ j(JMP)
   }
 }
